@@ -22,8 +22,8 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private ProductValidation productValidation;
+    // @Autowired
+    // private ProductValidation productValidation;
 
     @GetMapping
     public ResponseEntity<?> list() {
@@ -41,7 +41,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody Product product, BindingResult result) {
-        productValidation.validate(product, result);
+        // productValidation.validate(product, result);
         if (result.hasErrors()) {
             return validation(result);
         }
@@ -58,7 +58,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@Valid @RequestBody Product product, BindingResult result, @PathVariable Long id) {
-        productValidation.validate(product, result);
+        // productValidation.validate(product, result);
         if (result.hasErrors()) {
             return validation(result);
         }

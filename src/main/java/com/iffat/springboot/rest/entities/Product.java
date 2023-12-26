@@ -1,5 +1,6 @@
 package com.iffat.springboot.rest.entities;
 
+import com.iffat.springboot.rest.validation.IsRequired;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 
@@ -19,7 +20,7 @@ public class Product {
     @NotNull
     private Integer price;
 
-    @NotBlank
+    @IsRequired
     private String description;
 
     public Product() {
