@@ -1,5 +1,6 @@
 package com.iffat.springboot.rest.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -20,6 +21,7 @@ public class User {
     private String username;
 
     @NotBlank
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
     @ManyToMany
@@ -31,8 +33,16 @@ public class User {
     )
     private List<Role> roles;
 
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+    private Boolean enabled;
+
     @Transient
     private boolean admin;
+
+    @PrePersist
+    public void prePersist() {
+        enabled = true;
+    }
 
     public Long getId() {
         return id;
@@ -72,5 +82,13 @@ public class User {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public Boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(Boolean enabled) {
+        this.enabled = enabled;
     }
 }
