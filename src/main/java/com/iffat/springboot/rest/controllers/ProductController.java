@@ -1,5 +1,6 @@
 package com.iffat.springboot.rest.controllers;
 
+import com.iffat.springboot.rest.ProductValidation;
 import com.iffat.springboot.rest.entities.Product;
 import com.iffat.springboot.rest.services.ProductService;
 import jakarta.validation.Valid;
@@ -21,6 +22,9 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private ProductValidation productValidation;
+
     @GetMapping
     public ResponseEntity<?> list() {
         return ResponseEntity.ok(productService.findAll());
@@ -37,6 +41,7 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<?> create(@Valid @RequestBody Product product, BindingResult result) {
+        productValidation.validate(product, result);
         if (result.hasErrors()) {
             return validation(result);
         }
@@ -53,6 +58,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<?> update(@Valid @RequestBody Product product, BindingResult result, @PathVariable Long id) {
+        productValidation.validate(product, result);
         if (result.hasErrors()) {
             return validation(result);
         }
