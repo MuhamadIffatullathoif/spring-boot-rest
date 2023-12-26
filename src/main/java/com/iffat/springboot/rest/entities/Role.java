@@ -1,6 +1,10 @@
 package com.iffat.springboot.rest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "roles")
@@ -13,7 +17,12 @@ public class Role {
     @Column(unique = true, nullable = false)
     private String name;
 
+    @JsonIgnoreProperties({"roles","handler","hibernateLazyInitializer"})
+    @ManyToMany(mappedBy = "roles")
+    private List<User> users;
+
     public Role() {
+        users = new ArrayList<>();
     }
 
     public Role(String name) {
@@ -34,5 +43,13 @@ public class Role {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 }

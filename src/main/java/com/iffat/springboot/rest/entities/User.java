@@ -1,10 +1,12 @@
 package com.iffat.springboot.rest.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -24,6 +26,7 @@ public class User {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
+    @JsonIgnoreProperties({"users","handler","hibernateLazyInitializer"})
     @ManyToMany
     @JoinTable(
             name = "users_roles",
@@ -38,6 +41,10 @@ public class User {
 
     @Transient
     private boolean admin;
+
+    public User() {
+        roles = new ArrayList<>();
+    }
 
     @PrePersist
     public void prePersist() {
