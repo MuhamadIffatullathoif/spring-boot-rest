@@ -39,6 +39,8 @@ public class ProductServiceImpl implements ProductService {
         Optional<Product> optionalProduct = productRepository.findById(id);
         if(optionalProduct.isPresent()) {
             Product product1 = optionalProduct.get();
+
+            product1.setSku(product.getSku());
             product1.setName(product.getName());
             product1.setDescription(product.getDescription());
             product1.setPrice(product.getPrice());
@@ -55,5 +57,10 @@ public class ProductServiceImpl implements ProductService {
             productRepository.delete(productOpt);
         });
         return optionalProduct;
+    }
+
+    @Override
+    public boolean isExistSku(String sku) {
+        return productRepository.existsBySku(sku);
     }
 }

@@ -1,5 +1,6 @@
 package com.iffat.springboot.rest.entities;
 
+import com.iffat.springboot.rest.validation.IsExistDB;
 import com.iffat.springboot.rest.validation.IsRequired;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
@@ -11,6 +12,10 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @IsExistDB
+    @IsRequired
+    private String sku;
 
     @NotEmpty
     @Size(min = 3, max = 20)
@@ -62,5 +67,13 @@ public class Product {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getSku() {
+        return sku;
+    }
+
+    public void setSku(String sku) {
+        this.sku = sku;
     }
 }
