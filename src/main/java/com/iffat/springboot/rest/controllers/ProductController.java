@@ -6,9 +6,12 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -33,14 +36,28 @@ public class ProductController {
     }
 
     @PostMapping
-    public ResponseEntity<Product> create(@Valid @RequestBody Product product) {
+    public ResponseEntity<?> create(@Valid @RequestBody Product product, BindingResult result) {
+        if (result.hasErrors()) {
+            return validation(result);
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body(productService.save(product));
     }
 
+    private ResponseEntity<?> validation(BindingResult result) {
+        Map<String, String> errors = new HashMap<>();
+        result.getFieldErrors().forEach(error -> {
+            errors.put(error.getField(), "Field " + error.getField() + " " + error.getDefaultMessage());
+        });
+        return ResponseEntity.badRequest().body(errors);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@Valid  @PathVariable Long id, @RequestBody Product product) {
+    public ResponseEntity<?> update(@Valid @RequestBody Product product, BindingResult result, @PathVariable Long id) {
+        if (result.hasErrors()) {
+            return validation(result);
+        }
         Optional<Product> optionalProduct = productService.update(id, product);
-        if(optionalProduct.isPresent()) {
+        if (optionalProduct.isPresent()) {
             return ResponseEntity.status(HttpStatus.CREATED).body(optionalProduct.orElseThrow());
         }
         return ResponseEntity.notFound().build();
@@ -49,7 +66,7 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
         Optional<Product> optionalProduct = productService.delete(id);
-        if(optionalProduct.isPresent()) {
+        if (optionalProduct.isPresent()) {
             return ResponseEntity.ok(optionalProduct.orElseThrow());
         }
         return ResponseEntity.notFound().build();
