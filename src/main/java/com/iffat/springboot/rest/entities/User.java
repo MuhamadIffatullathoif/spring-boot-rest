@@ -25,6 +25,9 @@ public class User {
     )
     private List<Role> roles;
 
+    @Transient
+    private boolean admin;
+
     public Long getId() {
         return id;
     }
@@ -55,5 +58,13 @@ public class User {
 
     public void setRoles(List<Role> roles) {
         this.roles = roles;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }
