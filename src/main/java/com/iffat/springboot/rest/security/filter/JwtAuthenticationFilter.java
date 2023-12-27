@@ -2,6 +2,9 @@ package com.iffat.springboot.rest.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iffat.springboot.rest.entities.User;
+import io.jsonwebtoken.Jwts;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -10,11 +13,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
-    private AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
+
+    private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -36,5 +44,25 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         return authenticationManager.authenticate(authenticationToken);
+    }
+
+    @Override
+    protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
+        User user = (User) authResult.getPrincipal();
+        String username = user.getUsername();
+        String token = Jwts.builder()
+                .subject(username)
+                .signWith(SECRET_KEY)
+                .compact();
+
+        response.addHeader("Authentication", "Bearer " + token);
+
+        Map<String, String> body = new HashMap<>();
+        body.put("token", token);
+        body.put("username", username);
+        body.put("message", String.format("Hello %s, you have logged in successfully.", username));
+        response.getWriter().write(new ObjectMapper().writeValueAsString(body));
+        response.setContentType("application/json");
+        response.setStatus(200);
     }
 }
