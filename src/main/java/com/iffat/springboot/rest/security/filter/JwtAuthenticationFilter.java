@@ -2,6 +2,7 @@ package com.iffat.springboot.rest.security.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.iffat.springboot.rest.entities.User;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -11,18 +12,21 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.iffat.springboot.rest.security.TokenJwtConfig.*;
 
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
-
-    private static final SecretKey SECRET_KEY = Jwts.SIG.HS256.key().build();
 
     public JwtAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -50,12 +54,20 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         User user = (User) authResult.getPrincipal();
         String username = user.getUsername();
+        Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
+
+        Claims claims = Jwts.claims().build();
+        claims.put("authorities", roles);
+
         String token = Jwts.builder()
                 .subject(username)
+                .claims(claims)
+                .expiration(new Date(System.currentTimeMillis() + 3_600_000))
+                .issuedAt(new Date())
                 .signWith(SECRET_KEY)
                 .compact();
 
-        response.addHeader("Authentication", "Bearer " + token);
+        response.addHeader(HEADER_AUTHORIZATION, PREFIX_TOKEN + token);
 
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
