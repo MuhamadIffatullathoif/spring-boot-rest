@@ -8,6 +8,9 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.juli.logging.LogFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -37,15 +40,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         User user = null;
         String username = null;
         String password = null;
-
         try {
             user = new ObjectMapper().readValue(request.getInputStream(), User.class);
             username = user.getUsername();
-            password = user.getUsername();
+            password = user.getPassword();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, password);
         return authenticationManager.authenticate(authenticationToken);
     }
@@ -57,7 +58,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         Collection<? extends GrantedAuthority> roles = authResult.getAuthorities();
 
         Claims claims = Jwts.claims()
-                .add("authorities", roles)
+                .add("authorities", new ObjectMapper().writeValueAsString(roles))
                 .add("username", username)
                 .build();
 

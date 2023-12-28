@@ -14,6 +14,9 @@ public class IsExistDBValidation implements ConstraintValidator<IsExistDB, Strin
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext constraintValidatorContext) {
+        if(productRepository == null) {
+            return true;
+        }
         return !productRepository.existsBySku(value);
     }
 }
